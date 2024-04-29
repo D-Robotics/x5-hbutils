@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+#define CORE_NUM	1	/* sunrise5 only has 1 bpu core */
 #define MOVEUP(x) printf("\033[%dA", (x))
 #define MOVEDOWN(x) printf("\033[%dB", (x))
 static const char short_options[] = "b:p:c:r:f:th";
@@ -299,7 +300,8 @@ static int set_frq(int bpu_id,char *freq)
 static void help_message()
 {
 	printf("BPU PROFILE HELP INFORMATION\n");
-	printf(">>> -b/--bpu         [BPU CORE,0--bpu0,1--bpu1,2--ALL BPU] (required)\n");
+	// printf(">>> -b/--bpu         [BPU CORE,0--bpu0,1--bpu1,2--ALL BPU] (required)\n");
+	printf(">>> -b/--bpu         [BPU CORE,0--bpu0] (required)\n");
 	printf(">>> -p/--power       [POWER OFF/ON,0--OFF,1--ON]\n");
 	printf(">>> -c/--clock       [CLOCK OFF/ON,0--OFF,1--ON]\n");
 	printf(">>> -t/--time        [GET FC TIME,NO ARGUMENT]\n");
@@ -317,7 +319,6 @@ int main(int argc, char **argv)
 			switch (cmd_parser_ret) {
 				case 'b':
 					cmd.bpu_core = atoi(optarg);
-
 				break;
 
 				case 'p':
@@ -349,11 +350,22 @@ int main(int argc, char **argv)
 			}
 	}
 
-	if (cmd.bpu_core < 0 || cmd.bpu_core > 2) {
-		printf("bpu core error,you should select 0/1/2\n");
-		help_message();
-		return 0;
+	if (CORE_NUM == 1) {
+		/* sunrise5 only has 1 bpu core */
+		if (cmd.bpu_core != 0) {
+			printf("only has 1 bpu core. please just selct bpu core 0\n");
+			help_message();
+			return 0;
+		}
+	} else {
+		/* other case usually has 2 bpu core */
+		if (cmd.bpu_core < 0 || cmd.bpu_core > 2) {
+			printf("bpu core error,you should select 0/1/2\n");
+			help_message();
+			return 0;
+		}
 	}
+
 	//printf("%s,%d,%s,%s,%d,%d\n",cmd.bpu_clock,cmd.bpu_core,cmd.bpu_frq,cmd.bpu_power,cmd.bpu_ratio,cmd.bpu_time);
 
 	int ratio_fd0;
