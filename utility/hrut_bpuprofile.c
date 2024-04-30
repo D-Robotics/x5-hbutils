@@ -15,7 +15,7 @@
 
 #define MOVEUP(x) printf("\033[%dA", (x))
 #define MOVEDOWN(x) printf("\033[%dB", (x))
-static const char short_options[] = "b:p:c:r:f:te:h";
+static const char short_options[] = "b:p:c:r:f:th";
 static const struct option long_options[] = {{"bpu", required_argument, NULL, 'b'},
                                              {"power", required_argument, NULL, 'p'},
                                              {"clock", required_argument, NULL, 'm'},
@@ -97,26 +97,6 @@ static int set_power(int bpu_id,char *buf)
 		return -1;
 	}
 	close(power_fd);
-	return 0;
-}
-
-static int set_fc_time (char *fc_enable)
-{
-	int setfc_fd;
-	int ret;
-
-	setfc_fd = open("/sys/devices/system/bpu/fc_time_enable", O_RDWR, 0664);
-	if(setfc_fd  == -1) {
-		return -1;
-	}
-
-	ret = write(setfc_fd, fc_enable, strlen(fc_enable));
-	if (ret < strlen(fc_enable)) {
-		printf("set fc time error\n");
-		close(setfc_fd);
-		return -1;
-	}
-	close(setfc_fd);
 	return 0;
 }
 
@@ -322,7 +302,6 @@ static void help_message()
 	printf(">>> -b/--bpu         [BPU CORE,0--bpu0,1--bpu1,2--ALL BPU] (required)\n");
 	printf(">>> -p/--power       [POWER OFF/ON,0--OFF,1--ON]\n");
 	printf(">>> -c/--clock       [CLOCK OFF/ON,0--OFF,1--ON]\n");
-	printf(">>> -e/--enabletime  [GET FC TIME/ON,0--OFF,1--ON]\n");
 	printf(">>> -t/--time        [GET FC TIME,NO ARGUMENT]\n");
 	printf(">>> -f/--frq         [SET BPU FREQUENCY,ARGUMENT:N]\n");
 	printf(">>> -r/--ratio       [BPU RATIO,N--N TIMES,0--FOREVER]\n");
@@ -410,11 +389,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	/*set bpu fc time enable*/
-	if(cmd.bpu_time_en != NULL) {
-		if (set_fc_time(cmd.bpu_time_en) != 0)
-				return -1;
-	}
 	/*get bpu fc time*/
 	if (cmd.bpu_time == 1) {
 		if (cmd.bpu_core == 2) {
