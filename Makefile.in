@@ -1,0 +1,73 @@
+ifneq (${SRC_DEVICE_COMMON_DIR},)
+include ${SRC_DEVICE_COMMON_DIR}/Makefile
+else
+CROSS_COMPILE =
+CC = ${CROSS_COMPILE}gcc
+CXX = $(CROSS_COMPILE)g++
+AR = ${CROSS_COMPILE}ar
+AS = ${CROSS_COMPILE}as
+LD = ${CROSS_COMPILE}ld
+STRIP = ${CROSS_COMPILE}strip
+RANLIB = ${CROSS_COMPILE}ranlib
+OBJCOPY = ${CROSS_COMPILE}objcopy
+OBJDUMP = ${CROSS_COMPILE}objdump
+READELF = ${CROSS_COMPILE}readelf
+NM = ${CROSS_COMPILE}nm
+
+CFLAGS = -Wall
+CXXFLAGS = -Wall
+CFLAGS_DYNAMIC = -fPIC -shared
+CFLAGS_STATIC = -rcs
+LDFLAGS =
+INCS =
+LIBS =
+endif
+
+ifeq ($(BUILD_VERBOSE),1)
+	Q =
+else
+	Q = @
+endif
+
+SRC_PATH = $(shell pwd)
+MODULE_NAME = $(notdir ${SRC_PATH})
+
+ifneq ($(OUTPUT_BUILD_DIR),)
+	MODULE_OUT_DIR = ${OUTPUT_BUILD_DIR}/$(shell realpath --relative-to=${HR_TOP_DIR} ${SRC_PATH})
+else
+	MODULE_OUT_DIR = ${SRC_PATH}/out
+endif
+
+PRODUCT_DEB_DIR ?= ${MODULE_OUT_DIR}
+MODULE_RUNTIME_DIR = ${MODULE_OUT_DIR}/${MODULE_NAME}-runtime
+MODULE_DEV_DIR = ${MODULE_OUT_DIR}/${MODULE_NAME}-dev
+
+export CROSS_COMPILE CC CXX AR AS LD STRIP RANLIB OBJCOPY OBJDUMP READELF NM \
+		CFLAGS CXXFLAGS CFLAGS_DYNAMIC CFLAGS_STATIC LDFLAGS INCS LIBS \
+		MODULE_NAME SRC_PATH MODULE_OUT_DIR Q MODULE_RUNTIME_DIR MODULE_DEV_DIR
+
+deb:
+	$(if $(wildcard DEBIAN/control),,$(error Please creat control file))
+ifeq ($(HB_PKG_HBUTILS_RUNTIME_DEB), y)
+	$(if $(wildcard ${MODULE_RUNTIME_DIR}),,$(error Please run make install))
+	mk_deb_package.py --name ${MODULE_NAME} \
+				--pkg_type runtime \
+				--control ${SRC_PATH}/DEBIAN/control \
+				--ori_dir ${MODULE_RUNTIME_DIR} \
+				--out_dir ${PRODUCT_DEB_DIR}
+endif
+ifeq ($(HB_PKG_HBUTILS_DEV_DEB), y)
+	$(if $(wildcard ${MODULE_DEV_DIR}),,$(error Please run make install))
+	mk_deb_package.py --name ${MODULE_NAME} \
+				--pkg_type dev \
+				--control ${SRC_PATH}/DEBIAN/control \
+				--ori_dir ${MODULE_DEV_DIR} \
+				--out_dir ${PRODUCT_DEB_DIR}
+endif
+ifeq ($(HB_PKG_HBUTILS_SRC_TAR), y)
+	$(if $(wildcard ${MODULE_RUNTIME_DIR}),,$(error Please run make install))
+	mk_deb_package.py --name ${MODULE_NAME} \
+				--pkg_type src \
+				--ori_dir ${SRC_PATH} \
+				--out_dir ${PRODUCT_DEB_DIR}
+endif

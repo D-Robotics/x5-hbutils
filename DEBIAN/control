@@ -1,0 +1,6 @@
+Package: PKG_NAME
+Version: PKG_VERSION
+Depends: PKG_DEPEND
+Architecture: PKG_ARCH
+Maintainer: Horizon
+Description: Hobot utility.
