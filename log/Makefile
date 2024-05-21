@@ -1,7 +1,7 @@
 MODULE_OUT_DIR_LOG = ${MODULE_OUT_DIR}/log
 $(shell mkdir -p ${MODULE_OUT_DIR_LOG})
 
-SRCS_C = $(wildcard *.c)
+SRCS_C = $(filter-out chip_log.c, $(wildcard *.c))
 OBJS = $(addprefix ${MODULE_OUT_DIR_LOG}/, $(patsubst %.c, %.o, ${SRCS_C}))
 OBJECT = $(addprefix ${MODULE_OUT_DIR_LOG}/, $(patsubst %.c, %, ${SRCS_C}))
 

@@ -44,7 +44,7 @@
 /* soc config */
 #define SOC_ID_FILE "/sys/class/socinfo/soc_uid"
 #define BOARD_ID_FILE "/sys/class/socinfo/board_id"
-#define SOC_THERMAL_FILE "/sys/class/thermal/thermal_zone0/temp"
+#define SOC_THERMAL_FILE "/sys/class/thermal/thermal_zone1/temp"
 
 /* cpu config */
 #define CPU_LOAD_FILE "/proc/stat"
@@ -58,7 +58,7 @@
 
 /* ddr config, DDR_BAND_GET_CMD may change */
 #define DDR_PORT_NUM_MAX 16
-#define DDR_BAND_GET_CMD "hrut_ddr -t all -n 1 -p"
+#define DDR_BAND_GET_CMD "hrut_ddr -t all -p"
 #define DDR_BAND_NUMS_FLAG "Perf"
 #define DDR_BAND_READ_FLAG "Read"
 #define DDR_BAND_WRITE_FLAG "Write"
