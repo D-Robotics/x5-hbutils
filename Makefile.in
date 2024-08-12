@@ -46,7 +46,7 @@ export CROSS_COMPILE CC CXX AR AS LD STRIP RANLIB OBJCOPY OBJDUMP READELF NM \
 		CFLAGS CXXFLAGS CFLAGS_DYNAMIC CFLAGS_STATIC LDFLAGS INCS LIBS \
 		MODULE_NAME SRC_PATH MODULE_OUT_DIR Q MODULE_RUNTIME_DIR MODULE_DEV_DIR
 
-deb:
+deb: utility timesync log
 	$(if $(wildcard DEBIAN/control),,$(error Please creat control file))
 ifeq ($(HB_PKG_HBUTILS_RUNTIME_DEB), y)
 	$(if $(wildcard ${MODULE_RUNTIME_DIR}),,$(error Please run make install))
