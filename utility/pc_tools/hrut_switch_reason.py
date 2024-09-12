@@ -63,11 +63,11 @@ def read_switch_reason(filename):
 
 def main():
     if len(sys.argv) != 3:
-        print(f"Usage: {sys.argv[0]} <misc_file> [--current|--all]")
+        print(f"Usage: {sys.argv[0]} <misc_file> <--current|--all>")
         sys.exit(1)
 
     if len(sys.argv) == 2 and (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
-        print(f"Usage: {sys.argv[0]} <misc_file> [--current|--all]")
+        print(f"Usage: {sys.argv[0]} <misc_file> <--current|--all>")
         sys.exit(0)
 
     filename = sys.argv[1]
