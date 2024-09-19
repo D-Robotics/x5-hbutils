@@ -307,7 +307,7 @@ static int show_bw_info(long num)
 #ifndef CONFIG_HOBOT_X5
 			if (ddr_info[cur].portdata[i].raddr_num) {
 				read_bw = ((unsigned long) ddr_info[cur].portdata[i].rdata_num) *
-						  16 * (1000 / sample.sample_period) >> 20;
+						  16 * 1000 / sample.sample_period >> 20;
 				if (show_port_id >= PORT_NUM || show_port_id == i)
 					printf("%4lu     ", read_bw);
 				bw_sum += read_bw;
@@ -317,7 +317,7 @@ static int show_bw_info(long num)
 			}
 #else
 			read_bw = ((unsigned long) ddr_info[cur].portdata[i].rdata_num) *
-					(1000 / ddr_info[cur].real_period) >> 20;
+					1000 / ddr_info[cur].real_period >> 20;
 			if (show_port_id >= PORT_NUM || show_port_id == i)
 					printf("%4lu     ", read_bw);
 			bw_sum += read_bw;
@@ -327,7 +327,7 @@ static int show_bw_info(long num)
 		bw_sum = 0;
 #ifndef CONFIG_HOBOT_X5
 		read_bw = ((unsigned long) ddr_info[cur].rd_cmd_num) *
-				  rd_cmd_bytes * (1000 / sample.sample_period) >> 20;
+				  rd_cmd_bytes * 1000 / sample.sample_period >> 20;
 		if (show_port_id >= PORT_NUM)
 			printf("%4lu", read_bw);
 #endif
@@ -339,7 +339,7 @@ static int show_bw_info(long num)
 #ifndef CONFIG_HOBOT_X5
 			if (ddr_info[cur].portdata[i].waddr_num) {
 				write_bw = ((unsigned long) ddr_info[cur].portdata[i].wdata_num) *
-							16 * (1000 / sample.sample_period) >> 20;
+							16 * 1000 / sample.sample_period >> 20;
 				if (show_port_id >= PORT_NUM || show_port_id == i)
 					printf("%4lu     ", write_bw);
 				bw_sum += write_bw;
@@ -349,7 +349,7 @@ static int show_bw_info(long num)
 			}
 #else
 			write_bw = ((unsigned long) ddr_info[cur].portdata[i].wdata_num) *
-					(1000 / ddr_info[cur].real_period) >> 20;
+					1000 / ddr_info[cur].real_period >> 20;
 			if (show_port_id >= PORT_NUM || show_port_id == i)
 					printf("%4lu     ", write_bw);
 			bw_sum += write_bw;
@@ -359,7 +359,7 @@ static int show_bw_info(long num)
 		bw_sum = 0;
 #ifndef CONFIG_HOBOT_X5
 		write_bw = ((unsigned long) ddr_info[cur].wr_cmd_num) *
-					wr_cmd_bytes * (1000 / sample.sample_period) >> 20;
+					wr_cmd_bytes * 1000 / sample.sample_period >> 20;
 		if (show_port_id >= PORT_NUM)
 		printf("%4lu\n", write_bw);
 #endif
@@ -392,10 +392,10 @@ static int show_raw_info(long num)
 #ifndef CONFIG_HOBOT_X5
 			if (ddr_info[cur].portdata[i].raddr_num) {
 				read_bw = ((unsigned long) ddr_info[cur].portdata[i].rdata_num) *
-						  16 * (1000 / sample.sample_period) >> 20;
+						  16 * 1000 / sample.sample_period >> 20;
 #else
 				read_bw = ((unsigned long) ddr_info[cur].portdata[i].rdata_num) *
-						  (1000 / ddr_info[cur].real_period) >> 20;
+						  1000 / ddr_info[cur].real_period >> 20;
 				printf("\n        p[%d](bw:%6lu cmd_num:%6u max_lantency:%6u min_lantency:%6u cmd_accomulative_latency:%6u stop_ost:%6u) ", i, \
 						read_bw, \
 						ddr_info[cur].rd_cmd_num, \
@@ -425,7 +425,7 @@ static int show_raw_info(long num)
 		}
 #ifndef CONFIG_HOBOT_X5
 		read_bw = ((unsigned long) ddr_info[cur].rd_cmd_num) *
-				  rd_cmd_bytes * (1000 / sample.sample_period) >> 20;
+				  rd_cmd_bytes * 1000 / sample.sample_period >> 20;
 		printf("\n        ddrc:%6lu MB/s;\n", read_bw);
 #endif
 		printf("\nWrite: ");
@@ -433,7 +433,7 @@ static int show_raw_info(long num)
 #ifndef CONFIG_HOBOT_X5
 			if (ddr_info[cur].portdata[i].waddr_num) {
 				write_bw = ((unsigned long) ddr_info[cur].portdata[i].wdata_num) *
-							16 * (1000 / sample.sample_period) >> 20;
+							16 * 1000 / sample.sample_period >> 20;
 #else
 				write_bw = ((unsigned long) ddr_info[cur].portdata[i].wdata_num) *
 							(1000 / ddr_info[cur].real_period) >> 20;
@@ -465,9 +465,9 @@ static int show_raw_info(long num)
 		}
 #ifndef CONFIG_HOBOT_X5
 		write_bw = ((unsigned long) ddr_info[cur].wr_cmd_num) *
-					wr_cmd_bytes * (1000 / sample.sample_period) >> 20;
+					wr_cmd_bytes * 1000 / sample.sample_period >> 20;
 		mask_bw = ((unsigned int) ddr_info[cur].mwr_cmd_num) *
-					wr_cmd_bytes * (1000 / sample.sample_period) >> 20;
+					wr_cmd_bytes * 1000 / sample.sample_period >> 20;
 		printf("\n        ddrc %6lu MB/s, mask %6lu MB/s\n", write_bw, mask_bw);
 #endif
 		printf("\n");
