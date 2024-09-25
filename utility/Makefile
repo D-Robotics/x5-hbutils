@@ -12,11 +12,11 @@ LIBS += -lalog -lpthread
 all: $(OBJECT) install
 
 ${MODULE_OUT_DIR_UTILITY}/%.o:./%.c
-	@$(CC) $(CFLAGS) $(LDFLAGS) -o $@ -c $<
+	@$(CC) $(CFLAGS) $(INCS) $(LDFLAGS) -o $@ -c $<
 
 ${MODULE_OUT_DIR_UTILITY}/%:${MODULE_OUT_DIR_UTILITY}/%.o
 	@echo CC $@
-	@$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) $(INCS) $(LDFLAGS) -o $@ $^
 
 
 ${MODULE_OUT_DIR_UTILITY}/%:${MODULE_OUT_DIR_UTILITY}/%.o
