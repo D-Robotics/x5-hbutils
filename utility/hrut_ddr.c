@@ -386,7 +386,7 @@ static int show_raw_info(long num)
 	}
 
 	for (cur = 0; cur < num; cur++) {
-		printf("Time %llu ", ddr_info[cur].curtime);
+		printf("\nTime %.3fs       ", (double)ddr_info[cur].curtime / 1000.0);
 		printf("\nRead : ");
 		for (i = 0; i < PORT_NUM; i++) {
 #ifndef CONFIG_HOBOT_X5
@@ -396,7 +396,7 @@ static int show_raw_info(long num)
 #else
 				read_bw = ((unsigned long) ddr_info[cur].portdata[i].rdata_num) *
 						  1000 / ddr_info[cur].real_period >> 20;
-				printf("\n        p[%d](bw:%6lu cmd_num:%6u max_lantency:%6u min_lantency:%6u cmd_accomulative_latency:%6u stop_ost:%6u) ", i, \
+				printf("\n        %-5s(bw:%6lu cmd_num:%6u max_lantency:%6u min_lantency:%6u cmd_accomulative_latency:%10u stop_ost:%6u) ", port_type[i], \
 						read_bw, \
 						ddr_info[cur].rd_cmd_num, \
 						ddr_info[cur].portdata[i].rd_max_latency, \
@@ -437,7 +437,7 @@ static int show_raw_info(long num)
 #else
 				write_bw = ((unsigned long) ddr_info[cur].portdata[i].wdata_num) *
 							(1000 / ddr_info[cur].real_period) >> 20;
-				printf("\n        p[%d](bw:%6lu cmd_num:%6u max_lantency:%6u min_lantency:%6u cmd_accomulative_latency:%6u stop_ost:%6u) ", i, \
+				printf("\n        %-5s(bw:%6lu cmd_num:%6u max_lantency:%6u min_lantency:%6u cmd_accomulative_latency:%10u stop_ost:%6u) ", port_type[i], \
 						write_bw, \
 						ddr_info[cur].wr_cmd_num, \
 						ddr_info[cur].portdata[i].wr_max_latency, \
