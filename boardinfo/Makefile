@@ -40,7 +40,7 @@ clean:
 	echo ${OUT_DIR}
 	rm -rf ${OUT_DIR}/*.o $(OBJECT)
 
-install:
+install: build
 ifeq ($(HB_PKG_HBUTILS_RUNTIME_DEB), y)
 	$(Q)install -d ${MODULE_RUNTIME_DIR}/usr/hobot/lib
 	install $(LIB_SO) -m 644 ${MODULE_RUNTIME_DIR}/usr/hobot/lib
