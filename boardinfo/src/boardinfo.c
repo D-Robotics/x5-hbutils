@@ -19,7 +19,7 @@ char* boardinfo_key[] = {
 	"soc_name",
 	"hw_name",
 	"board_version",
-	"board_name",
+	"hw_info",
 	"bootdevice_name",
 	"soc_uid",
 	"ddr_type",
