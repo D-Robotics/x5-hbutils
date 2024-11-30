@@ -139,6 +139,9 @@ do
 		min=$((min / 1000000))
 		cur=$((cur / 1000000))
 		max=$((max / 1000000))
+		min=$(align_calculation 100 $min)
+		cur=$(align_calculation 100 $cur)
+		max=$(align_calculation 100 $max)
 		echo -e "\tgc8000:  $min\t$cur\t$max"
 	fi
 
