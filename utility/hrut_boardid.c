@@ -39,6 +39,6 @@ int main(int argc, char **argv)
                 return -1;
         }
         fclose(stream);
-        printf("board_id: 0x%s\n", boardid);
+        printf("board_id: %s\n", boardid);
         return 0;
 }
