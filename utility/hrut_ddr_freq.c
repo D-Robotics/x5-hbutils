@@ -59,13 +59,18 @@ int process_folder(const char *folder_path) {
         return -1;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
         struct dirent *entry = NULL;
-        DIR *dir = opendir("/sys/class/devfreq");
+        DIR *dir = NULL;
         int ret = 0;
         char folder_path[512] = {0};
 
-
+        if (argc > 1) {
+                fprintf(stderr, "*** this tool is used to get current ddr frequency ***\n");
+                fprintf(stderr, " usage: hrut_ddr_freq\n");
+                exit(EXIT_FAILURE);
+        }
+        dir = opendir("/sys/class/devfreq");
         if (dir == NULL) {
                 perror("Error opening directory");
                 return EXIT_FAILURE;
@@ -75,14 +80,17 @@ int main() {
                 if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
                         snprintf(folder_path, sizeof(folder_path), "/sys/class/devfreq/%s", entry->d_name);
                         ret = process_folder(folder_path);
-                        if (ret)
-                                break;
+                        if (ret == 0)
+                                goto exit;
                 }
         }
-        closedir(dir);
         if (ret) {
-                printf("can not find defreq: %s\n", FREQNAME);
+                printf("can not find devfreq: %s\n", FREQNAME);
+                closedir(dir);
                 return EXIT_FAILURE;
         }
+exit:
+        closedir(dir);
+
         return EXIT_SUCCESS;
 }
