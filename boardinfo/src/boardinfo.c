@@ -14,6 +14,18 @@
 #define BOARD_INFO_SZIE		256
 #define BUF_LEN 			512
 
+#ifndef GIT_COMMIT_HASH
+#define GIT_COMMIT_HASH "unknown"
+#endif
+#ifndef VERSION
+#define VERSION "unknown"
+#endif
+
+#define GIT_COMMIT_MAX_LEN 40
+static char libboardinfo_git_commit[GIT_COMMIT_MAX_LEN] = GIT_COMMIT_HASH;
+#define VERSION_MAX_LEN 40
+static char libboardinfo_version[VERSION_MAX_LEN] = VERSION;
+
 char* boardinfo_key[] = {
 	"soc_gen",
 	"soc_name",
@@ -29,6 +41,18 @@ char* boardinfo_key[] = {
 	"board_id",
 	"bak_slot"
 };
+
+
+/**
+ * @description: Get both the git commit hash and version of libboardinfo.
+ * @return: A pointer to a static string containing both git commit hash and lib version.
+ */
+const char* hb_libboardinfo_get_version_info(void) {
+	static char version_info[GIT_COMMIT_MAX_LEN + VERSION_MAX_LEN];
+	snprintf(version_info, sizeof(version_info), "%s-%s",
+			 libboardinfo_version, libboardinfo_git_commit);
+	return version_info;
+}
 
 static int32_t read_from_file(char *dst, char *file)
 {

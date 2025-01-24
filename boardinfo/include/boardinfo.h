@@ -47,6 +47,12 @@ enum hb_binfo_retval {
 
 int32_t hb_get_boardinfo(char* key, void *dst, uint32_t len);
 
+/**
+ * @description: Get both the git commit hash and version of libboardinfo.
+ * @return: A pointer to a static string containing both git commit hash and lib version.
+ */
+const char* hb_libboardinfo_get_version_info(void);
+
 #ifdef __cplusplus
 }
 #endif

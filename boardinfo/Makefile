@@ -8,6 +8,10 @@ all: build install
 LIB_VERSION_MAJOR := 1
 LIB_VERSION_MINOR := 0
 LIB_VERSION_PATCH := 0
+ULTIS_VERSION = $(LIB_VERSION_MAJOR).$(LIB_VERSION_MINOR).$(LIB_VERSION_PATCH)
+DEFINES += -DVERSION=\"${ULTIS_VERSION}\"
+DEFINES += $(EXTRA_CFLAGS)
+$(info ULTIS_DEFINES is: $(DEFINES))
 
 LINKNAME := libboardinfo.so
 SONAME := $(LINKNAME).$(LIB_VERSION_MAJOR)
@@ -19,6 +23,7 @@ OBJS     := $(addprefix ${OUT_DIR}/, $(patsubst %.c, %.o, ${SRCS}))
 LIB_SO := ${OUT_DIR}/$(RELNAME)
 OBJECT = $(LIB_SO)
 
+CFLAGS += $(DEFINES)
 CFLAGS += -Wall
 CFLAGS_DYNAMIC := -fPIC -shared
 INCS := -I./include $(INCS)
