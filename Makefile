@@ -1,6 +1,6 @@
 include Makefile.in
 $(shell mkdir -p ${MODULE_OUT_DIR})
-.PHONY: all deb clean utility timesync log hb_gpioinfo boardinfo
+.PHONY: all deb clean utility timesync log hb_gpioinfo boardinfo getdmkey
 
 # get commit id message
 ifeq ($(wildcard $(PWD)/.git),)
@@ -24,7 +24,7 @@ endif
 EXTRA_CFLAGS += -DGIT_COMMIT_HASH=\"$(GIT_COMMIT_HASH)\"
 export EXTRA_CFLAGS
 
-all: utility timesync log deb hb_gpioinfo boardinfo
+all: utility timesync log deb hb_gpioinfo boardinfo getdmkey
 
 utility:
 	make all -C utility
@@ -40,6 +40,9 @@ hb_gpioinfo:
 
 boardinfo:
 	make all -C boardinfo
+
+getdmkey:
+	make all -C getdmkey
 
 clean:
 	rm -rf ${MODULE_OUT_DIR}/*
