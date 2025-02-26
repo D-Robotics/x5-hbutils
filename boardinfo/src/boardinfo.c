@@ -39,6 +39,8 @@ char* boardinfo_key[] = {
 	"ddr_vendor",
 	"ddr_freq",
 	"board_id",
+	"sec_chip",
+	"sec_boot",
 	"bak_slot"
 };
 
