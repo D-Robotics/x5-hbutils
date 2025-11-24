@@ -57,7 +57,7 @@ do
 			value=$(awk 'BEGIN {print "'$value'"/1000.0}')
 			printf "\t%-8s : %-3.1f (C)\n" "DDR" "$value"
 
-			cat "$temp/temp2_input" 2>/dev/null
+			cat "$temp/temp2_input" >/dev/null 2>&1
 			if [ $? -eq 0 ]; then
 				value=$(cat "$temp/temp2_input")
 			else
