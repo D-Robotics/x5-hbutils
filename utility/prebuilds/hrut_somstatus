@@ -136,7 +136,7 @@ do
 
 	if [ -d "/sys/class/devfreq/3c000000.gc8000" ]; then
 		echo "GPU gc8000 frequency information---->"
-		printf "\t      min(M)\tcur(M)\tmax(M)\n"
+		printf "\t      min(M)\tcur(M)\tmax(M)\tratio\n"
 		min=$(cat /sys/class/devfreq/3c000000.gc8000/min_freq)
 		cur=$(cat /sys/class/devfreq/3c000000.gc8000/cur_freq)
 		max=$(cat /sys/class/devfreq/3c000000.gc8000/max_freq)
@@ -146,7 +146,23 @@ do
 		min=$(align_calculation 100 "$min")
 		cur=$(align_calculation 100 "$cur")
 		max=$(align_calculation 100 "$max")
-		printf "\t%-8s: %d\t%d\t%d\n" "gc8000" "$min" "$cur" "$max"
+		load_percent=$(awk -F ':' '/load/ {gsub(/ |%/,"",$2); print $2}' /sys/kernel/debug/gc/load)
+		printf "\t%-8s: %d\t%d\t%d\t%d\n" "gc8000" "$min" "$cur" "$max" "$load_percent"
+	fi
+
+	if [ -f "/sys/kernel/debug/n2d/load" ]; then
+		echo "GPU gc820 information---->"
+		printf "\t%-8s  \tcur(M)\t\tratio\n"
+		clk_path="/sys/kernel/debug/clk/gc820_clk/clk_rate"
+		if [ -f "$clk_path" ]; then
+			cur=$(cat "$clk_path")
+		else
+			cur = 750000000
+		fi
+		cur=$((cur / 1000000))
+		cur=$(align_calculation 1 "$cur")
+		load_percent=$(awk -F ':' '/load/ {gsub(/ |%/,"",$2); print $2}' /sys/kernel/debug/n2d/load)
+		printf "\t%-8s: \t%d\t\t%d\n" "gc820" "$cur" "$load_percent"
 	fi
 
 	if [ "$count" -gt 0 ]; then
