@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2017-2021 Bartosz Golaszewski <bartekgola@gmail.com>
 // SPDX-FileCopyrightText: 2022 Kent Gibson <warthog618@gmail.com>
 
+#include <ctype.h>
 #include <getopt.h>
 #include <gpiod.h>
 #include <stdarg.h>
@@ -26,6 +27,7 @@ typedef struct {
 	int pinnum;             // eg: 347 //pinfistnum + linenumber
 	int linenumber;         // eg: 0
 	char currentfunc[32];   // eg: Defalut
+	char pin_strength[16];  // eg: 9 mA (output drive strength from pinconf-pins)
 } PinInfo;
 
 typedef struct {
@@ -118,6 +120,51 @@ int parse_pinmux_file(const char *filename, PinInfo *pinInfos, int max_pins, Chi
 
 	fclose(file);
 	return pinCount;
+}
+
+// Parse pinconf-pins line and update matching pin's drive strength.
+// Line format: "pin 8 (hsio_enet_rx_clk): ... output drive strength (9 mA), ..."
+static int parse_pinconf_line(const char *line, PinInfo *pinInfos, int pinCount) {
+	char pinname[50] = {0};
+	int pin_number = 0;
+	int ma = 0;
+	const char *drv_str;
+	int i;
+
+	if (sscanf(line, "pin %d (%49[^)])", &pin_number, pinname) < 2)
+		return 0;
+	drv_str = strstr(line, "output drive strength (");
+	if (!drv_str || sscanf(drv_str, "output drive strength (%d mA)", &ma) != 1)
+		return 0;
+	for (i = 0; i < pinCount; i++) {
+		if (strcmp(pinInfos[i].pinname, pinname) == 0) {
+			snprintf(pinInfos[i].pin_strength, sizeof(pinInfos[i].pin_strength), "%d mA", ma);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// Parse pinconf-pins file and fill pin_strength for matching pins.
+int parse_pinconf_file(const char *filename, PinInfo *pinInfos, int pinCount) {
+	FILE *file = fopen(filename, "r");
+	int i;
+
+	for (i = 0; i < pinCount; i++)
+		snprintf(pinInfos[i].pin_strength, sizeof(pinInfos[i].pin_strength), "-");
+	if (!file)
+		return 0;
+	{
+		char line[512];
+		if (fgets(line, sizeof(line), file)) { /* skip "Pin config settings per pin" */ }
+		if (fgets(line, sizeof(line), file)) { /* skip "Format: ..." */ }
+		while (fgets(line, sizeof(line), file)) {
+			if (strncmp(line, "pin", 3) == 0)
+				parse_pinconf_line(line, pinInfos, pinCount);
+		}
+	}
+	fclose(file);
+	return 0;
 }
 
 // Remove the trailing colon from the string (if present)
@@ -374,10 +421,11 @@ static void print_line_info(struct gpiod_line_info *info, bool unquoted_strings,
 	//添加用于打印 Pin 信息的代码
 	for (j = 0; j < gpio_chip_data->pincount; j++) {
 		if (gpio_chip_data->pininfo[j].linenumber == offset) {
-			printf(" %-20s\t%-8d %-6s\t",
+			printf(" %-20s\t%-8d %-18s %-10s",
 					gpio_chip_data->pininfo[j].pinname,
 					gpio_chip_data->pininfo[j].pinnum,
-					gpio_chip_data->pininfo[j].currentfunc);
+					gpio_chip_data->pininfo[j].currentfunc,
+					gpio_chip_data->pininfo[j].pin_strength);
 			break;
 		}
 	}
@@ -394,9 +442,6 @@ static void list_lines(struct line_resolver *resolver, struct gpiod_chip *chip,
 	struct gpiod_line_info *info;
 	int offset, num_lines;
 	int i = 0;
-	int j = 0;
-	char tgpios [32] = {0};
-	char tparent [32] = {0};
 	chip_info = gpiod_chip_get_info(chip);
 	if (!chip_info)
 		die_perror("unable to read info from chip %s",
@@ -447,7 +492,9 @@ static void list_lines(struct line_resolver *resolver, struct gpiod_chip *chip,
 						printf("%*s", 10, "");
 						printf("[PinNum]");
 						printf("%*s", 3, "");
-						printf("[PinFunc]\n");
+						printf("[PinFunc]");
+						printf("%*s", 9, "");
+						printf("[PinStrength]\n");
 					}
 					printf("\tline %2u:", offset);
 					fputc('\t', stdout);
@@ -494,6 +541,12 @@ int main(int argc, char **argv)
 	const char *aon_iomuxcpinmuxfilename = "/sys/kernel/debug/pinctrl/31040000.aon_iomuxc/pinmux-pins";
 	const char *dsp_iomuxcpinmuxfilename = "/sys/kernel/debug/pinctrl/31040014.dsp_iomuxc/pinmux-pins";
 
+	// File paths for pinconf (output drive strength etc.)
+	const char *hsio_pinconffilename = "/sys/kernel/debug/pinctrl/35050000.hsio_iomuxc/pinconf-pins";
+	const char *lsio_pinconffilename = "/sys/kernel/debug/pinctrl/34180000.lsio_iomuxc/pinconf-pins";
+	const char *aon_pinconffilename = "/sys/kernel/debug/pinctrl/31040000.aon_iomuxc/pinconf-pins";
+	const char *dsp_pinconffilename = "/sys/kernel/debug/pinctrl/31040014.dsp_iomuxc/pinconf-pins";
+
 	// Loop over the parsed chip information and check for control names
 	for (j = 0; j < chipCount; j++) {
 
@@ -506,7 +559,8 @@ int main(int argc, char **argv)
 			if (pinCount < 0) {
 				return EXIT_FAILURE;
 			}
-			sort_pin_info(&chipinfo[j].pininfo, pinCount);
+			parse_pinconf_file(hsio_pinconffilename, chipinfo[j].pininfo, pinCount);
+			sort_pin_info(chipinfo[j].pininfo, pinCount);
 			each_convert_to_uppercase(&chipinfo[j],pinCount);
 		}
 
@@ -519,7 +573,8 @@ int main(int argc, char **argv)
 			if (pinCount < 0) {
 				return EXIT_FAILURE;
 			}
-			sort_pin_info(&chipinfo[j].pininfo, pinCount);
+			parse_pinconf_file(hsio_pinconffilename, chipinfo[j].pininfo, pinCount);
+			sort_pin_info(chipinfo[j].pininfo, pinCount);
 			each_convert_to_uppercase(&chipinfo[j],pinCount);
 		}
 
@@ -532,7 +587,8 @@ int main(int argc, char **argv)
 			if (pinCount < 0) {
 				return EXIT_FAILURE;
 			}
-			sort_pin_info(&chipinfo[j].pininfo, pinCount);
+			parse_pinconf_file(lsio_pinconffilename, chipinfo[j].pininfo, pinCount);
+			sort_pin_info(chipinfo[j].pininfo, pinCount);
 			each_convert_to_uppercase(&chipinfo[j],pinCount);
 		}
 
@@ -545,7 +601,8 @@ int main(int argc, char **argv)
 			if (pinCount < 0) {
 				return EXIT_FAILURE;
 			}
-			sort_pin_info(&chipinfo[j].pininfo, pinCount);
+			parse_pinconf_file(lsio_pinconffilename, chipinfo[j].pininfo, pinCount);
+			sort_pin_info(chipinfo[j].pininfo, pinCount);
 			each_convert_to_uppercase(&chipinfo[j],pinCount);
 		}
 
@@ -558,7 +615,8 @@ int main(int argc, char **argv)
 			if (pinCount < 0) {
 				return EXIT_FAILURE;
 			}
-			sort_pin_info(&chipinfo[j].pininfo, pinCount);
+			parse_pinconf_file(aon_pinconffilename, chipinfo[j].pininfo, pinCount);
+			sort_pin_info(chipinfo[j].pininfo, pinCount);
 			each_convert_to_uppercase(&chipinfo[j],pinCount);
 		}
 
@@ -571,7 +629,8 @@ int main(int argc, char **argv)
 			if (pinCount < 0) {
 				return EXIT_FAILURE;
 			}
-			sort_pin_info(&chipinfo[j].pininfo, pinCount);
+			parse_pinconf_file(dsp_pinconffilename, chipinfo[j].pininfo, pinCount);
+			sort_pin_info(chipinfo[j].pininfo, pinCount);
 			each_convert_to_uppercase(&chipinfo[j],pinCount);
 		}
 
