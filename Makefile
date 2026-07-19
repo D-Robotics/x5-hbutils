@@ -6,15 +6,16 @@ $(shell mkdir -p ${MODULE_OUT_DIR})
 ifeq ($(wildcard $(PWD)/.git),)
     GIT_COMMIT_HASH := unknown
 else
-    GIT_COMMIT_HASH := $(shell cd ${PWD} && git rev-parse --verify --short HEAD 2>&1)
-    $(info Git commit hash: $(GIT_COMMIT_HASH))
-    # 如果 git 命令失败，输出错误信息
-    ifeq ($(findstring fatal,$(GIT_COMMIT_HASH)),fatal)
-        $(error Git command failed: $(GIT_COMMIT_HASH))
-    endif
-    GIT_STATUS := $(shell cd ${PWD} && git diff-index --name-only HEAD)
-    ifneq ($(strip $(GIT_STATUS)),)
-        GIT_COMMIT_HASH := ${GIT_COMMIT_HASH}-dirty
+    GIT_COMMIT_HASH := $(shell cd ${PWD} && git rev-parse --verify --short HEAD 2>/dev/null)
+    ifeq ($(GIT_COMMIT_HASH),)
+        $(warning git rev-parse failed in $(PWD), GIT_COMMIT_HASH set to unknown)
+        GIT_COMMIT_HASH := unknown
+    else
+        $(info Git commit hash: $(GIT_COMMIT_HASH))
+        GIT_STATUS := $(shell cd ${PWD} && git diff-index --name-only HEAD 2>/dev/null)
+        ifneq ($(strip $(GIT_STATUS)),)
+            GIT_COMMIT_HASH := ${GIT_COMMIT_HASH}-dirty
+        endif
     endif
 endif
 
